@@ -2,9 +2,9 @@
 
 $:.unshift File.expand_path(File.dirname(__FILE__) + '/../lib')
 
-require 'mspec/version'
-require 'mspec/utils/options'
-require 'mspec/utils/script'
+require_relative '../version'
+require_relative '../utils/options'
+require_relative '../utils/script'
 
 
 class MSpecRun < MSpecScript

@@ -1,22 +1,28 @@
 require 'mspec/expectations/expectations'
-require 'mspec/runner/formatters/dotted'
+require_relative 'dotted'
 
 class YamlFormatter < DottedFormatter
   def initialize(out=nil)
     super(nil)
+    @examples_last = 0
+    @finish = out.nil? ? $stdout : File.open(out, "w")
+  end
 
-    if out.nil?
-      @finish = $stdout
-    else
-      @finish = File.open out, "w"
-    end
+  def register
+    super
+    MSpec.register :unload, self
   end
 
   def switch
     @out = @finish
   end
 
-  def after(state)
+  def after(state) ; end
+
+  def unload
+    file_examples = @tally.counter.examples - @examples_last
+    @examples_last = @tally.counter.examples
+    ::STDOUT.write ".#{file_examples}"
   end
 
   def finish

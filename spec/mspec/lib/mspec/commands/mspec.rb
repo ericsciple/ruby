@@ -1,17 +1,16 @@
 #!/usr/bin/env ruby
 
-require 'mspec/version'
-require 'mspec/utils/options'
-require 'mspec/utils/script'
-require 'mspec/helpers/tmp'
-require 'mspec/runner/actions/filter'
-require 'mspec/runner/actions/timer'
+require_relative '../version'
+require_relative '../utils/options'
+require_relative '../utils/script'
+require_relative '../helpers/tmp'
+require_relative '../runner/actions/filter'
+require_relative '../runner/actions/timer'
 
 
 class MSpecMain < MSpecScript
   def initialize
     super
-
     config[:loadpath] = []
     config[:requires] = []
     config[:target]   = ENV['RUBY'] || 'ruby'
@@ -83,6 +82,7 @@ class MSpecMain < MSpecScript
       options.all
       patterns = options.parse(config[:options])
       @files = files_from_patterns(patterns)
+      @files.shuffle!
     end
   end
 
@@ -91,7 +91,7 @@ class MSpecMain < MSpecScript
   def multi_exec(argv)
     MSpec.register_files @files
 
-    require 'mspec/runner/formatters/multi'
+    require_relative '../runner/formatters/multi'
     formatter = MultiFormatter.new
     if config[:formatter]
       warn "formatter options is ignored due to multi option"
@@ -115,13 +115,29 @@ class MSpecMain < MSpecScript
     puts children.map { |child| child.gets }.uniq
     formatter.start
     last_files = {}
-
-    until @files.empty?
+    ttl_files = @files.length
+    cntr = 1
+    wid = ttl_files.to_s.length
+    fmt = "[%#{wid}d/%#{wid}d]  %1s  %4s  %s"
+    io_a = {}
+    children.each_with_index { |io, i| io_a[io] = (i + 65).chr }
+    
+    not_first = false
+    until not_first && last_files.values.compact == []
+      not_first = true
       IO.select(children)[0].each { |io|
         reply = io.read(1)
         case reply
         when '.'
-          formatter.unload
+          if last_file = last_files[io]
+            while chunk = (io.read_nonblock(4096) rescue nil)
+              reply += chunk
+            end
+            reply.gsub!(/^\.+|\.+$/, '')
+            fn = last_file[/spec\/ruby\/(\S+)$/,1]
+            ::STDOUT.puts format(fmt, cntr, ttl_files ,io_a[io], reply, fn)
+            cntr += 1
+          end
         when nil
           raise "Worker died!"
         else
@@ -135,7 +151,7 @@ class MSpecMain < MSpecScript
           end
           abort "\n#{msg}: #{reply.inspect}"
         end
-
+        last_files[io] = nil
         unless @files.empty?
           file = @files.shift
           last_files[io] = file

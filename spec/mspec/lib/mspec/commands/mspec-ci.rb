@@ -2,9 +2,9 @@
 
 $:.unshift File.expand_path(File.dirname(__FILE__) + '/../lib')
 
-require 'mspec/version'
-require 'mspec/utils/options'
-require 'mspec/utils/script'
+require_relative '../version'
+require_relative '../utils/options'
+require_relative '../utils/script'
 
 
 class MSpecCI < MSpecScript
@@ -68,7 +68,7 @@ class MSpecCI < MSpecScript
     tags = ["fails", "critical", "unstable", "incomplete", "unsupported"]
     tags += Array(config[:ci_xtags])
 
-    require 'mspec/runner/filters/tag'
+    require_relative '../runner/filters/tag'
     filter = TagFilter.new(:exclude, *tags)
     filter.register
 

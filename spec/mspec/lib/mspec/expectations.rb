@@ -1,2 +1,2 @@
-require 'mspec/expectations/expectations'
-require 'mspec/expectations/should'
+require_relative 'expectations/expectations'
+require_relative 'expectations/should'

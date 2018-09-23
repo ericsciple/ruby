@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 
-require 'mspec/version'
-require 'mspec/utils/options'
-require 'mspec/utils/script'
+require_relative '../version'
+require_relative '../utils/options'
+require_relative '../utils/script'
 
 
 class MSpecTag < MSpecScript
@@ -97,7 +97,7 @@ class MSpecTag < MSpecScript
   end
 
   def register
-    require 'mspec/runner/actions'
+    require_relative '../runner/actions'
 
     case config[:tagger]
     when :add, :del

@@ -1,5 +1,5 @@
-require 'mspec/expectations/expectations'
-require 'mspec/runner/formatters/dotted'
+require_relative '../../expectations/expectations'
+require_relative 'dotted'
 
 class SpinnerFormatter < DottedFormatter
   attr_reader :length

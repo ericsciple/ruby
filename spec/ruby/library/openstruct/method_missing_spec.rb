@@ -32,9 +32,9 @@ describe "OpenStruct#method_missing when called with a method name ending in '='
 end
 
 describe "OpenStruct#method_missing when passed additional arguments" do
-  it "raises a NoMethodError" do
+  it "raises a NoMethodError or NameError" do
     os = OpenStruct.new
-    lambda { os.method_missing(:test, 1, 2, 3) }.should raise_error(NoMethodError)
+    lambda { os.method_missing(:test, 1, 2, 3) }.should raise_error(NameError)
   end
 end
 

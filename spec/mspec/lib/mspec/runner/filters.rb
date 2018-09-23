@@ -1,4 +1,4 @@
-require 'mspec/runner/filters/match'
-require 'mspec/runner/filters/regexp'
-require 'mspec/runner/filters/tag'
-require 'mspec/runner/filters/profile'
+require_relative 'filters/match'
+require_relative 'filters/regexp'
+require_relative 'filters/tag'
+require_relative 'filters/profile'

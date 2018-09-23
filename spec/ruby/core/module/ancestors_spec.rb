@@ -7,9 +7,24 @@ describe "Module#ancestors" do
     ModuleSpecs.ancestors.should == [ModuleSpecs]
     ModuleSpecs::Basic.ancestors.should == [ModuleSpecs::Basic]
     ModuleSpecs::Super.ancestors.should == [ModuleSpecs::Super, ModuleSpecs::Basic]
-    ModuleSpecs.without_test_modules(ModuleSpecs::Parent.ancestors).should ==
-      [ModuleSpecs::Parent, Object, Kernel, BasicObject]
-    ModuleSpecs.without_test_modules(ModuleSpecs::Child.ancestors).should ==
+
+    ancestors = ModuleSpecs.without_test_modules(ModuleSpecs::Parent.ancestors)
+    if defined? ::Shellwords
+      ancestors.reject! { |obj| ::Shellwords == obj } 
+    end
+    if defined? ::JSON::Ext::Generator
+      ancestors.reject! { |obj| ::JSON::Ext::Generator::GeneratorMethods::Object == obj }
+    end
+    ancestors.should == [ModuleSpecs::Parent, Object, Kernel, BasicObject]
+
+    ancestors = ModuleSpecs.without_test_modules(ModuleSpecs::Child.ancestors)
+    if defined? ::Shellwords
+      ancestors.reject! { |obj| ::Shellwords == obj } 
+    end
+    if defined? ::JSON::Ext::Generator
+      ancestors.reject! { |obj| ::JSON::Ext::Generator::GeneratorMethods::Object == obj }
+    end
+    ancestors.should ==
       [ModuleSpecs::Child, ModuleSpecs::Super, ModuleSpecs::Basic, ModuleSpecs::Parent, Object, Kernel, BasicObject]
   end
 

@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 
 require 'rbconfig'
-require 'mspec/version'
-require 'mspec/utils/options'
-require 'mspec/utils/name_map'
-require 'mspec/helpers/fs'
+require_relative '../version'
+require_relative '../utils/options'
+require_relative '../utils/name_map'
+require_relative '../helpers/fs'
 
 class MkSpec
   attr_reader :config

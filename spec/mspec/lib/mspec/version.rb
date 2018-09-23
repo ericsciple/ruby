@@ -1,4 +1,4 @@
-require 'mspec/utils/version'
+require_relative 'utils/version'
 
 module MSpec
   VERSION = SpecVersion.new "1.8.0"

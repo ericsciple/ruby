@@ -1,6 +1,6 @@
-require 'mspec/runner/formatters/spinner'
+require_relative 'dotted'
 
-class MultiFormatter < SpinnerFormatter
+class MultiFormatter < DottedFormatter
   def initialize(out=nil)
     super(out)
     @counter = @tally = Tally.new

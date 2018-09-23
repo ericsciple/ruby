@@ -1,7 +1,7 @@
-require 'mspec/expectations/expectations'
-require 'mspec/runner/actions/timer'
-require 'mspec/runner/actions/tally'
-require 'mspec/runner/actions/leakchecker' if ENV['CHECK_LEAKS']
+require_relative '../../expectations/expectations'
+require_relative '../actions/timer'
+require_relative '../actions/tally'
+require_relative '../actions/leakchecker' if ENV['CHECK_LEAKS']
 
 class DottedFormatter
   attr_reader :exceptions, :timer, :tally
@@ -34,6 +34,10 @@ class DottedFormatter
     MSpec.register :finish,    self
     MSpec.register :abort,     self
   end
+
+  def start  ; end
+
+  def unload ; end
 
   def abort
     if @current_state
@@ -92,7 +96,7 @@ class DottedFormatter
   # Callback for the MSpec :finish event. Prints a description
   # and backtrace for every exception that occurred while
   # evaluating the examples.
-  def finish
+  def finish(_ = nil)
     print "\n"
     count = 0
     @exceptions.each do |exc|

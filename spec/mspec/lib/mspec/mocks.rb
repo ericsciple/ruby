@@ -1,3 +1,3 @@
-require 'mspec/mocks/mock'
-require 'mspec/mocks/proxy'
-require 'mspec/mocks/object'
+require_relative 'mocks/mock'
+require_relative 'mocks/proxy'
+require_relative 'mocks/object'
