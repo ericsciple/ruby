@@ -3,7 +3,12 @@
 # should clean up any temporary files created so that the temp
 # directory is empty when the process exits.
 
-SPEC_TEMP_DIR = File.expand_path(ENV["SPEC_TEMP_DIR"] || "rubyspec_temp", ENV['TEMP'])
+SPEC_TEMP_DIR = if /mswin|mingw/ =~ RUBY_PLATFORM
+    File.expand_path(ENV["SPEC_TEMP_DIR"] || "rubyspec_temp",
+      ENV['TEMP'] || ENV['TMP'] || ENV['TMPDIR'] )
+  else
+    File.expand_path(ENV["SPEC_TEMP_DIR"] || "rubyspec_temp")
+  end
 
 SPEC_TEMP_UNIQUIFIER = "0"
 
