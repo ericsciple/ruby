@@ -16,7 +16,8 @@ describe "Matrix#real?" do
     Matrix[ [Complex(1,1), 2], [3, 4] ].real?.should be_false
   end
 
-  conflicts_with :CMath do
+  # mathn
+  unless ::Math.private_method_defined?(:rsqrt)
     it "returns false if one element is a Complex whose imaginary part is 0" do
       Matrix[ [Complex(1,0), 2], [3, 4] ].real?.should be_false
     end

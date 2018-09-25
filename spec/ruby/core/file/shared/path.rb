@@ -54,7 +54,7 @@ describe :file_path, shared: true do
 
   ruby_version_is "2.5" do
     platform_is :linux do
-      guard -> { defined?(File::TMPFILE) } do
+      if defined? ::File::TMPFILE
         before :each do
           @dir = tmp("tmpfilespec")
           mkdir_p @dir

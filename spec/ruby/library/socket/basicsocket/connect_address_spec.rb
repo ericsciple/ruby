@@ -53,7 +53,7 @@ describe 'Socket#connect_address' do
     end
   end
 
-  guard -> { SocketSpecs.ipv6_available? } do
+  if SocketSpecs.ipv6_available?
     describe 'using a socket bound to ::' do
       before do
         @sock = Socket.new(:INET6, :STREAM)

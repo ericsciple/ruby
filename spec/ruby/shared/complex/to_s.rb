@@ -15,8 +15,8 @@ describe :complex_to_s, shared: true do
     Complex(1, -5).to_s.should == "1-5i"
     Complex(-2.5, -1.5).to_s.should == "-2.5-1.5i"
 
-    # Guard against the Mathn library
-    conflicts_with :Prime do
+    # mathn
+    unless ::Math.private_method_defined?(:rsqrt)
       Complex(1, 0).to_s.should == "1+0i"
       Complex(1, -0).to_s.should == "1+0i"
     end

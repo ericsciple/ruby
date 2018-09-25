@@ -36,9 +36,9 @@ describe :kernel_Complex, shared: true do
   end
 
   describe "when passed [Integer/Float]" do
-    it "returns a new Complex number with 0 as the imaginary component" do
-      # Guard against the Mathn library
-      conflicts_with :Prime do
+    # mathn
+    unless ::Math.private_method_defined?(:rsqrt)
+      it "returns a new Complex number with 0 as the imaginary component" do
         Complex(1).should be_an_instance_of(Complex)
         Complex(1).imag.should == 0
         Complex(1).real.should == 1

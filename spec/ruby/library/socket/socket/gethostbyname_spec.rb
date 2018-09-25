@@ -111,7 +111,7 @@ describe 'Socket.gethostbyname' do
     end
   end
 
-  guard -> { SocketSpecs.ipv6_available? } do
+  if SocketSpecs.ipv6_available?
     describe 'using an IPv6 address' do
       describe 'the returned Array' do
         before do

@@ -16,7 +16,7 @@ describe "CApiFixnumSpecs" do
     max_int = (1 << 31) - 1
     min_int = -(1 << 31)
 
-    guard -> { fixnum_min <= min_int and max_int <= fixnum_max } do
+    if fixnum_min <= min_int and max_int <= fixnum_max
       it "converts a Fixnum representing the minimum and maximum native int" do
         @s.FIX2INT(max_int).should == max_int
         @s.FIX2INT(min_int).should == min_int

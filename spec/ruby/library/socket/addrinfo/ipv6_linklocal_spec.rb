@@ -1,7 +1,7 @@
 require_relative '../spec_helper'
 require_relative '../fixtures/classes'
 
-guard -> { SocketSpecs.ipv6_available? } do
+if SocketSpecs.ipv6_available?
   describe 'Addrinfo#ipv6_linklocal?' do
     platform_is_not :aix do
       it 'returns true for a link-local address' do

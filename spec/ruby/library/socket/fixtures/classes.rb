@@ -64,7 +64,7 @@ module SocketSpecs
       yield Socket::AF_INET, '127.0.0.1', 'AF_INET'
     end
 
-    guard -> { SocketSpecs.ipv6_available? } do
+    if SocketSpecs.ipv6_available?
       describe 'using IPv6' do
         yield Socket::AF_INET6, '::1', 'AF_INET6'
       end

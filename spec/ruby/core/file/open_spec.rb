@@ -525,7 +525,7 @@ describe "File.open" do
   end
 
   platform_is :linux do
-    guard -> { defined?(File::TMPFILE) } do
+    if defined? ::File::TMPFILE
       it "creates an unnamed temporary file with File::TMPFILE" do
         dir = tmp("tmpfilespec")
         mkdir_p dir

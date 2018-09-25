@@ -11,7 +11,7 @@ describe "IO#close_on_exec=" do
     rm_r @name
   end
 
-  guard -> { platform_is_not :windows } do
+  if platform_is_not :windows
     it "sets the close-on-exec flag if true" do
       @io.close_on_exec = true
       @io.close_on_exec?.should == true
@@ -62,7 +62,7 @@ describe "IO#close_on_exec?" do
     rm_r @name
   end
 
-  guard -> { platform_is_not :windows } do
+  if platform_is_not :windows
     it "returns true by default" do
       @io.close_on_exec?.should == true
     end

@@ -1,7 +1,8 @@
 require_relative '../../spec_helper'
 
 describe :rational_inspect, shared: true do
-  conflicts_with :Prime do
+  # mathn
+  unless ::Math.private_method_defined?(:rsqrt)
     it "returns a string representation of self" do
       Rational(3, 4).inspect.should == "(3/4)"
       Rational(-5, 8).inspect.should == "(-5/8)"

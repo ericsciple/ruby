@@ -133,10 +133,10 @@ describe "Operators" do
 
   it "* / % are left-associative" do
     (2*1/2).should == (2*1)/2
-    # Guard against the Mathn library
+    # mathn
     # TODO: Make these specs not rely on specific behaviour / result values
     # by using mocks.
-    conflicts_with :Prime do
+    unless ::Math.private_method_defined?(:rsqrt)
       (2*1/2).should_not == 2*(1/2)
     end
 

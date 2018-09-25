@@ -1,7 +1,7 @@
 require_relative '../spec_helper'
 require_relative '../fixtures/classes'
 
-guard -> { SocketSpecs.ipv6_available? } do
+if SocketSpecs.ipv6_available?
   describe 'Addrinfo#ipv6_to_ipv4' do
     it 'returns an Addrinfo for ::192.168.1.1' do
       addr = Addrinfo.ip('::192.168.1.1').ipv6_to_ipv4
