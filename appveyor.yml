@@ -119,7 +119,7 @@ for:
     # always update database
     - pacman -Sy
     - pacman -S --noconfirm --needed --noprogressbar mingw-w64-x86_64-toolchain
-    - pacman -S --noconfirm --needed --noprogressbar mingw-w64-x86_64-gdbm mingw-w64-x86_64-gmp mingw-w64-x86_64-libffi mingw-w64-x86_64-ncurses mingw-w64-x86_64-readline mingw-w64-x86_64-zlib
+    - pacman -S --noconfirm --needed --noprogressbar --force mingw-w64-x86_64-gdbm mingw-w64-x86_64-gmp mingw-w64-x86_64-libffi mingw-w64-x86_64-ncurses mingw-w64-x86_64-openssl mingw-w64-x86_64-readline mingw-w64-x86_64-zlib
     - cd %APPVEYOR_BUILD_FOLDER%
     - set CFLAGS=-march=%MSYS2_ARCH:_=-% -mtune=generic -O3 -pipe
     - set CXXFLAGS=%CFLAGS%
