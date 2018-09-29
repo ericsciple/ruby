@@ -62,6 +62,7 @@ for:
     - SET PATH=\usr\local\bin;%ruby_path%\bin;%PATH%;C:\msys64\mingw64\bin;C:\msys64\usr\bin
     - ruby --version
     - 'cl'
+    - where.exe nmake
     - SET
     - echo> Makefile srcdir=.
     - echo>> Makefile MSC_VER=0
