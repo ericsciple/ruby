@@ -123,7 +123,7 @@ echo "##vso[task.setvariable variable=BASERUBY]$drv/ruby/bin/ruby.exe"
 
 # set variable BUILD
 New-Item  -Path $src\..\build -ItemType Directory 1> $null
-$t = Resolve-Path -LiteralPath $src\..\build
+$t = (Resolve-Path -LiteralPath $src\..\build).tostring()
 echo "##vso[task.setvariable variable=BUILD]$t"
 
 # set variable BUILD_PATH used in each step
@@ -139,7 +139,7 @@ echo "##vso[task.setvariable variable=CHOST]$chost"
 
 # set variable INSTALL
 New-Item -Path $src\..\install -ItemType Directory 1> $null
-$t = Resolve-Path -LiteralPath $src\..\install
+$t = (Resolve-Path -LiteralPath $src\..\install).tostring()
 $tt = $t.replace('\', '/')
 echo "##vso[task.setvariable variable=INSTALL]$tt"
 

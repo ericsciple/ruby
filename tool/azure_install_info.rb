@@ -24,20 +24,11 @@ module VersInfo
   class << self
 
     def run
-      gem 'psych' if (ENV['APPVEYOR'] && RUBY_VERSION < '2.0')
+      puts '', RUBY_DESCRIPTION, ''
 
-      # Give AV build a title that means something
-      if /trunk/ =~ RUBY_DESCRIPTION && Dir.exist?('C:/Users/appveyor') && ENV['APPVEYOR']
-        title = "#{Time.now.utc.strftime('%F %R UTC')}   #{RUBY_DESCRIPTION[/\([^\)]+\)/]}"
-        `appveyor UpdateBuild -Message \"#{title}\"`
-      end
-
-      puts RUBY_DESCRIPTION
-      puts
-      puts "Build Type/Info: #{ri2_vers}"
       gcc = RbConfig::CONFIG["CC_VERSION_MESSAGE"] ?
         RbConfig::CONFIG["CC_VERSION_MESSAGE"][/\A.+?\n/].strip : 'unknown'
-      puts "       gcc info: #{gcc}"
+      puts "gcc info: #{gcc}"
       puts
       first('rubygems'  , 'Gem::VERSION'  , 2)  { Gem::VERSION     }
       puts
@@ -49,14 +40,12 @@ module VersInfo
       puts
 
       if first('openssl', 'OpenSSL::VERSION', 0) { OpenSSL::VERSION }
-        additional('SSL Verify'             , 0, 4) { ssl_verify }
         additional('OPENSSL_VERSION'        , 0, 4) { OpenSSL::OPENSSL_VERSION }
         if OpenSSL.const_defined?(:OPENSSL_LIBRARY_VERSION)
           additional('OPENSSL_LIBRARY_VERSION', 0, 4) { OpenSSL::OPENSSL_LIBRARY_VERSION }
         else
           additional('OPENSSL_LIBRARY_VERSION', 0, 4) { "Not Defined" }
         end
-        ssl_methods
         puts
         additional_file('X509::DEFAULT_CERT_FILE'    , 0, 4) { OpenSSL::X509::DEFAULT_CERT_FILE }
         additional_file('X509::DEFAULT_CERT_DIR'     , 0, 4) { OpenSSL::X509::DEFAULT_CERT_DIR }
@@ -236,33 +225,6 @@ module VersInfo
       sio_err.close
       strm_io = nil
       cmd = nil
-    end
-
-    def ssl_methods
-      ssl = OpenSSL::SSL
-      if RUBY_VERSION < '2.0'
-        additional('SSLContext::METHODS', 0, 4) {
-          ssl::SSLContext::METHODS.reject { |e| /client|server/ =~ e }.sort.join(' ')
-        }
-      else
-        require_relative 'ssl_test'
-        additional('Available Protocols', 0, 4) {
-          TestSSL.check_supported_protocol_versions
-        }
-      end
-    end
-
-    def ssl_verify
-      require 'net/http'
-      uri = URI.parse('https://raw.githubusercontent.com/gcc-mirror/gcc/master/config.guess')
-      Net::HTTP.start(uri.host, uri.port, :use_ssl => true, :verify_mode => OpenSSL::SSL::VERIFY_PEER) { |https|
-        Net::HTTP::Get.new uri
-      }
-      "Success"
-    rescue SocketError
-      "*** UNKNOWN - internet connection failure? ***"
-    rescue OpenSSL::SSL::SSLError # => e
-      "*** FAILURE ***"
     end
 
     def chk_cli(cmd, regex)
