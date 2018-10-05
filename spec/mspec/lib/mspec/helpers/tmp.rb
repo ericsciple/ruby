@@ -1,11 +1,22 @@
+# frozen_string_literal: true
+
 # Creates a temporary directory in the current working directory
-# for temporary files created while running the specs. All specs
-# should clean up any temporary files created so that the temp
-# directory is empty when the process exits.
+# (or the Windows temp directory) for temporary files created while
+# running the specs. All specs should clean up any temporary files
+# created so that the temp directory is empty when the process exits.
 
-SPEC_TEMP_DIR = File.expand_path(ENV["SPEC_TEMP_DIR"] || "rubyspec_temp")
+if /mswin|mingw/ =~ RUBY_PLATFORM
+  temp_dir = ENV['TMPDIR'] || ENV['TEMP'] || ENV['TMP']
+  if temp_dir and (temp_dir = temp_dir.dup.gsub("\\", "/")) and Dir.exist?(temp_dir)
+    SPEC_TEMP_DIR = File.expand_path(ENV["SPEC_TEMP_DIR"] || "rubyspec_temp", temp_dir)
+  else
+    SPEC_TEMP_DIR = File.expand_path(ENV["SPEC_TEMP_DIR"] || "rubyspec_temp")
+  end
+else
+  SPEC_TEMP_DIR = File.expand_path(ENV["SPEC_TEMP_DIR"] || "rubyspec_temp")
+end
 
-SPEC_TEMP_UNIQUIFIER = "0"
+SPEC_TEMP_UNIQUIFIER = "0".dup
 
 SPEC_TEMP_DIR_PID = Process.pid
 
