@@ -122,8 +122,8 @@ $env:path = $path
 echo "##vso[task.setvariable variable=BASERUBY]$drv/ruby/bin/ruby.exe"
 
 # set variable BUILD
+New-Item  -Path $src\..\build -ItemType Directory 1> $null
 $t = Resolve-Path -LiteralPath $src\..\build
-New-Item  -Path $t -ItemType Directory 1> $null
 echo "##vso[task.setvariable variable=BUILD]$t"
 
 # set variable BUILD_PATH used in each step

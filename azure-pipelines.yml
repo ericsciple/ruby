@@ -76,6 +76,12 @@ jobs:
         displayName: $(System.JobName) build & install
 
       - script: |
+          PATH=%INSTALL_PATH%
+          ruby %SRC%/tool/azure_install_info.rb
+        continueOnError: true
+        displayName: $(System.JobName) install info
+        
+      - script: |
           PATH=%BUILD_PATH%
           call "%VC_VARS%" %VCVARS_PLATFORM%
           cd %BUILD%
@@ -110,7 +116,7 @@ jobs:
           call "%VC_VARS%" %VCVARS_PLATFORM%
           attrib -r %TMPDIR_W% /d /s
           cd %SRC%\spec\ruby
-          ruby --disable=gems ../mspec/bin/mspec -j -T "--disable=gems"
+          ruby --disable=gems ../mspec/bin/mspec -T "--disable=gems"
         failOnStderr: false
         timeoutInMinutes: 10
         displayName: $(System.JobName) make test-spec
@@ -175,6 +181,12 @@ jobs:
         displayName: $(System.JobName) build & install
 
       - script: |
+          PATH=%INSTALL_PATH%
+          ruby %SRC%/tool/azure_install_info.rb
+        continueOnError: true
+        displayName: $(System.JobName) install info
+        
+      - script: |
           PATH=%BUILD_PATH%
           cd %SRC%\..\build
           mingw32-make btest TESTOPTS="-v -q"
@@ -205,7 +217,7 @@ jobs:
           PATH=%INSTALL_PATH%
           attrib -r %TMPDIR_W% /d /s
           cd %SRC%\spec\ruby
-          ruby --disable=gems ../mspec/bin/mspec -j -T "--disable=gems"
+          ruby --disable=gems ../mspec/bin/mspec -T "--disable=gems"
         failOnStderr: false
         timeoutInMinutes: 10
         displayName: $(System.JobName) make test-spec
