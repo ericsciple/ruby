@@ -20,7 +20,8 @@ module VersInfo
   else
     @@dash = "\u2015".dup.force_encoding 'utf-8'
   end
-
+  @@dash = '-'
+  
   class << self
 
     def run
@@ -58,9 +59,7 @@ module VersInfo
       puts
 
       double('psych', 'Psych::VERSION', 'LIBYAML_VERSION', 3, 1, 2) { [Psych::VERSION, Psych::LIBYAML_VERSION] }
-      require 'readline'
-      @rl_type = (Readline.method(:line_buffer).source_location ? 'rb' : 'so')
-      first('readline', "Readline::VERSION (#{@rl_type})", 3) { Readline::VERSION }
+      first('readline', "Readline::VERSION", 3) { Readline::VERSION }
       double('zlib', 'Zlib::VERSION', 'ZLIB_VERSION', 3, 1, 2) { [Zlib::VERSION, Zlib::ZLIB_VERSION] }
 
       if const_defined?(:Integer)
@@ -144,7 +143,7 @@ module VersInfo
       elsif /\./ =~ File.basename(fn)
         found = File.exist?(fn) ?
           "#{File.mtime(fn).utc.strftime('File Dated %F').ljust(23)}#{fn}" :
-          "#{'File Not Found!'.ljust(23)}Unknown path or file"
+          "#{'File Not Found!'.ljust(23)}#{fn}"
       else
         found = Dir.exist?(fn) ?
           "#{'Dir  Exists'.ljust(23)}#{fn}" :
@@ -241,7 +240,7 @@ module VersInfo
     end
 
     def highlight(str)
-      if RUBY_VERSION >= '2.0' || ENV.key?('APPVEYOR')
+      if false && RUBY_VERSION >= '2.0' || ENV.key?('APPVEYOR')
         str2 = str.dup
         while str2.sub!(/\A\n/, '') do ; puts ; end
         puts "#{YELLOW}#{str2}#{RESET}"
