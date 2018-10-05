@@ -1,0 +1,211 @@
+variables:          # build variables are set in azure_pipeline_prereqs_*.ps1
+  BASERUBY:         # full path to ruby.exe
+  BUILD:            # path to build folder, child of SRC for vc, sibling of SRC for mingw
+  BUILD_PATH:       # env PATH string for building (contains pre-installed Ruby)
+  GIT:              # full path to git.exe, uses 'no space' link
+  INSTALL:          # path to main install folder (not bin)
+  INSTALL_PATH:     # env PATH string with new Ruby, and no pre-installed Ruby
+  JOBS:             # NUMBER_OF_PROCESSORS
+  SRC:              # source/repo directory
+  TMPDIR:           # tmp folder on SRC drive slash
+  TMPDIR_W:         # tmp folder on SRC drive backslash
+
+jobs:
+  - job: Ruby_mswin
+    variables:      # Build variables are set in azure_pipeline_prereqs_*.ps1
+      OPENSSL_DIR:  #
+      VC_VARS:      # full path to correct vcvarsall.bat file
+    timeoutInMinutes: 60
+    pool:
+      vmImage: vs2015-win2012r2
+    strategy:
+      maxParallel: 5
+      matrix:
+        x64-mswin64_120:
+          vs: 120
+          VCVARS_PLATFORM: amd64
+          Platform: x64
+        x64-mswin64_140:
+          vs: 140
+          VCVARS_PLATFORM: amd64
+          Platform: x64
+    steps:
+      - checkout: self
+        fetchDepth: 10
+      - powershell: ./tool/azure_pipeline_prereqs_vc.ps1
+        displayName: $(System.JobName) install prerequisites
+
+      - script: |
+          cd %SRC%
+          mkdir \usr\local\bin
+          mkdir \usr\local\include
+          mkdir \usr\local\lib
+          for %%I in (%OPENSSL_DIR%\bin\*.dll) do mklink /h \usr\local\bin\%%~nxI %%I
+          attrib +r %SRC%\win32\*.* /s /d
+          attrib -r %BUILD% /s /d
+          PATH=%BUILD_PATH%
+          call "%VC_VARS%" %VCVARS_PLATFORM%
+          git checkout azure-pipelines
+          cd %SRC%\%Platform%-mswin_%vs%
+          call ..\win32\configure.bat --with-baseruby=%BASERUBY% --without-ext=+,dbm,gdbm,readline --with-opt-dir=/usr/local --disable-install-doc --with-openssl-dir=%OPENSSL_DIR:\=/%
+        displayName: $(System.JobName) setup & configure
+
+      - script: |
+          PATH=%BUILD_PATH%
+          call "%VC_VARS%" %VCVARS_PLATFORM%
+          cd %BUILD%
+          echo —————————————————————————————————————————————————————————————————  nmake update-unicode
+          nmake -l update-unicode
+          echo —————————————————————————————————————————————————————————————————  nmake update-gems
+          nmake -l update-gems
+          echo —————————————————————————————————————————————————————————————————  nmake extract-extlibs
+          nmake -l extract-extlibs
+        displayName: $(System.JobName) make update & extract
+
+      - script: |
+          PATH=%BUILD_PATH%
+          call "%VC_VARS%" %VCVARS_PLATFORM%
+          cd %BUILD%
+          attrib -r %SRC%\*.* /s /d
+          attrib -r %SRC%\%Platform%-mswin_%vs%\*.* /s /d
+          set srcdir=%SRC:\=/%
+          nmake -l
+          echo —————————————————————————————————————————————————————————————————  nmake install-nodoc
+          nmake install-nodoc
+          \usr\bin\ruby -v -e "p :locale => Encoding.find('locale'), :filesystem => Encoding.find('filesystem')"
+        displayName: $(System.JobName) build & install
+
+      - script: |
+          PATH=%BUILD_PATH%
+          call "%VC_VARS%" %VCVARS_PLATFORM%
+          cd %BUILD%
+          nmake -l btest TESTOPTS="-v -q"
+        continueOnError: true
+        failOnStderr: false
+        displayName: $(System.JobName) make btest
+
+      - script: |
+          PATH=%BUILD_PATH%
+          call "%VC_VARS%" %VCVARS_PLATFORM%
+          cd %BUILD%
+          nmake -l test-basic TESTOPTS="-v -q"
+        continueOnError: true
+        failOnStderr: false
+        displayName: $(System.JobName) make test-basic
+
+      - script: |
+          PATH=%BUILD_PATH%
+          call "%VC_VARS%" %VCVARS_PLATFORM%
+          cd %BUILD%
+          attrib -r %TMPDIR_W% /d /s
+          set RUBY_FORCE_TEST_JIT=1
+          nmake -l test-all TESTOPTS="-j %JOBS% --retry --job-status=normal --subprocess-timeout-scale=3.0 --show-skip"
+        continueOnError: true
+        failOnStderr: false
+        timeoutInMinutes: 20
+        displayName: $(System.JobName) make test-all
+
+      - script: |
+          PATH=%INSTALL_PATH%
+          call "%VC_VARS%" %VCVARS_PLATFORM%
+          attrib -r %TMPDIR_W% /d /s
+          cd $SRC\spec\ruby
+          ruby --disable=gems ../mspec/bin/mspec -j -T "--disable=gems"
+        failOnStderr: false
+        timeoutInMinutes: 10
+        displayName: $(System.JobName) make test-spec
+
+  - job: Ruby_mingw
+    variables:      # Build variables are set in azure_pipeline_prereqs_mingw.ps1
+      CHOST:        # x86_64-w64-mingw32 or i686-w64-mingw32
+      MARCH:        # x86-64 or i686
+      MSYSTEM:      # MINGW64 or MINGW32
+      MSYSTEM_CARCH: # this and below are used in makepkg, not sure if all needed
+      MSYSTEM_CHOST:
+      CARCH:
+      MINGW_PREFIX:
+    timeoutInMinutes: 60
+    pool:
+      vmImage: vs2015-win2012r2
+    strategy:
+      maxParallel: 5
+      matrix:
+        x64-mingw32:
+          platform: x64
+    steps:
+      - checkout: self
+        fetchDepth: 10
+      - powershell: ./tool/azure_pipeline_prereqs_mingw.ps1
+        displayName: $(System.JobName) install prerequisites
+
+      - script: |
+          PATH=%BUILD_PATH%
+          cd ..
+          mkdir build
+          mkdir install
+          cd %SRC%
+          git checkout azure-pipelines
+          set MSYS_NO_PATHCONV=1
+          set CFLAGS=-march=%MARCH% -mtune=generic -O3 -pipe
+          set CXXFLAGS=%CFLAGS%
+          set CPPFLAGS=-D_FORTIFY_SOURCE=2 -D__USE_MINGW_ANSI_STDIO=1 -DFD_SETSIZE=2048
+          set LDFLAGS=-pipe
+          sh -c "autoreconf -fi"
+          cd ..\build
+          sh ../s/configure --disable-install-doc --prefix=/. --build=%CHOST% --host=%CHOST% --target=%CHOST%
+        displayName: $(System.JobName) setup & configure
+
+      - script: |
+          PATH=%BUILD_PATH%
+          cd %SRC%\..\build
+          echo —————————————————————————————————————————————————————————————————  make update-unicode
+          mingw32-make update-unicode
+          echo —————————————————————————————————————————————————————————————————  make update-gems
+          mingw32-make update-gems
+          echo —————————————————————————————————————————————————————————————————  make extract-extlibs
+          mingw32-make extract-extlibs
+        displayName: $(System.JobName) make update & extract
+
+      - script: |
+          PATH=%BUILD_PATH%
+          cd %SRC%\..\build
+          mingw32-make -j%JOBS%
+          echo —————————————————————————————————————————————————————————————————  make install-nodoc
+          mingw32-make DESTDIR=%INSTALL% install-nodoc
+        displayName: $(System.JobName) build & install
+
+      - script: |
+          PATH=%BUILD_PATH%
+          cd %SRC%\..\build
+          mingw32-make btest TESTOPTS="-v -q"
+        continueOnError: true
+        failOnStderr: false
+        displayName: $(System.JobName) make btest
+
+      - script: |
+          PATH=%BUILD_PATH%
+          cd %SRC%\..\build
+          mingw32-make test-basic TESTOPTS="-v -q"
+        continueOnError: true
+        failOnStderr: false
+        displayName: $(System.JobName) make test-basic
+
+      - script: |
+          PATH=%BUILD_PATH%
+          cd %SRC%\..\build
+          attrib -r %TMPDIR_W% /d /s
+          set RUBY_FORCE_TEST_JIT=1
+          mingw32-make test-all TESTOPTS="-j %JOBS% --retry --job-status=normal --subprocess-timeout-scale=1.5 --show-skip"
+        continueOnError: true
+        failOnStderr: false
+        timeoutInMinutes: 25
+        displayName: $(System.JobName) make test-all
+
+      - script: |
+          PATH=%INSTALL_PATH%
+          attrib -r %TMPDIR_W% /d /s
+          cd $SRC\spec\ruby
+          ruby --disable=gems ../mspec/bin/mspec -j -T "--disable=gems"
+        failOnStderr: false
+        timeoutInMinutes: 10
+        displayName: $(System.JobName) make test-spec
