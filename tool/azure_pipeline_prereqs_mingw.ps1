@@ -138,8 +138,8 @@ echo "##vso[task.setvariable variable=GIT]$drv/git/cmd/git.exe"
 echo "##vso[task.setvariable variable=CHOST]$chost"
 
 # set variable INSTALL
+New-Item -Path $src\..\install -ItemType Directory 1> $null
 $t = Resolve-Path -LiteralPath $src\..\install
-New-Item -Path $t -ItemType Directory 1> $null
 $tt = $t.replace('\', '/')
 echo "##vso[task.setvariable variable=INSTALL]$tt"
 

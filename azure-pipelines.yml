@@ -109,7 +109,7 @@ jobs:
           PATH=%INSTALL_PATH%
           call "%VC_VARS%" %VCVARS_PLATFORM%
           attrib -r %TMPDIR_W% /d /s
-          cd $SRC\spec\ruby
+          cd %SRC%\spec\ruby
           ruby --disable=gems ../mspec/bin/mspec -j -T "--disable=gems"
         failOnStderr: false
         timeoutInMinutes: 10
@@ -204,7 +204,7 @@ jobs:
       - script: |
           PATH=%INSTALL_PATH%
           attrib -r %TMPDIR_W% /d /s
-          cd $SRC\spec\ruby
+          cd %SRC%\spec\ruby
           ruby --disable=gems ../mspec/bin/mspec -j -T "--disable=gems"
         failOnStderr: false
         timeoutInMinutes: 10
