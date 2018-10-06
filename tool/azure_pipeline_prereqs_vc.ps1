@@ -101,7 +101,8 @@ $files = "msys2-runtime-2.11.1-2",
          "gzip-1.9-1",
          "m4-1.4.18-2",
          "patch-2.7.6-1",
-         "sed-4.5-1"
+         "sed-4.5-1",
+         "tar-1.30-1"
 
 $dir1 = "-o$dl_path"
 $dir2 = "-o$drv\msys64"
