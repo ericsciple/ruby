@@ -4,12 +4,13 @@ platform_is :windows do
   require 'win32ole'
 
   describe "WIN32OLE_EVENT.new" do
-    before :each do
+    before :all do
       @ie = WIN32OLESpecs.new_ole('InternetExplorer.Application')
     end
 
-    after :each do
-      @ie.Quit if @ie
+    after :all do
+      @ie.Quit
+      @ie = nil
     end
 
     it "raises TypeError given invalid argument" do

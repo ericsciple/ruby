@@ -4,12 +4,13 @@ platform_is :windows do
   require 'win32ole'
 
   describe "WIN32OLE#ole_put_methods" do
-    before :each do
+    before :all do
       @ie = WIN32OLESpecs.new_ole('InternetExplorer.Application')
     end
 
-    after :each do
+    after :all do
       @ie.Quit
+      @ie = nil
     end
 
     it "raises ArgumentError if argument is given" do
