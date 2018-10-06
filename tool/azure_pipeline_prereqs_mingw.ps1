@@ -127,7 +127,7 @@ $t = (Resolve-Path -LiteralPath $src\..\build).tostring()
 echo "##vso[task.setvariable variable=BUILD]$t"
 
 # set variable BUILD_PATH used in each step
-$t = "\usr\local\bin;$drv\ruby\bin;$drv\msys64\$mingw\bin;$drv\msys64\usr\bin;$drv\git\cmd;$env:path"
+$t = "\usr\local\bin;$drv\ruby\bin;$drv\msys64\$mingw\bin;$drv\msys64\usr\bin;$drv\git\cmd;$base_path"
 echo "##vso[task.setvariable variable=BUILD_PATH]$t"
 
 # set variable GIT pointing to the exe, RubyGems tests use it (path with no space)
@@ -144,7 +144,7 @@ $tt = $t.replace('\', '/')
 echo "##vso[task.setvariable variable=INSTALL]$tt"
 
 # set variable INSTALL_PATH
-$t = "$t\bin;$drv\msys64\$mingw\bin;$drv\msys64\usr\bin;$drv\git\cmd;$env:path"
+$t = "$t\bin;$drv\msys64\$mingw\bin;$drv\msys64\usr\bin;$drv\git\cmd;$base_path"
 echo "##vso[task.setvariable variable=INSTALL_PATH]$t"
 
 # set variable JOBS

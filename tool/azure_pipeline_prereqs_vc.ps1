@@ -140,7 +140,7 @@ echo "##vso[task.setvariable variable=BASERUBY]$drv/ruby/bin/ruby.exe"
 echo "##vso[task.setvariable variable=BUILD]$src\$platform"
 
 # set variable BUILD_PATH used in each step
-$t = "\usr\local\bin;$drv\ruby\bin;$drv\msys64\usr\bin;$drv\git\cmd;$env:path"
+$t = "\usr\local\bin;$drv\ruby\bin;$drv\msys64\usr\bin;$drv\git\cmd;$base_path"
 echo "##vso[task.setvariable variable=BUILD_PATH]$t"
 
 # set variable GIT pointing to the exe, RubyGems tests use it (path with no space)
@@ -148,7 +148,7 @@ New-Item -Path $drv\git -ItemType Junction -Value $env:ProgramFiles\Git 1> $null
 echo "##vso[task.setvariable variable=GIT]$drv/git/cmd/git.exe"
 
 # set variable INSTALL_PATH
-$t = "\usr\bin;\usr\local\bin;$drv\msys64\usr\bin;$drv\git\cmd;$env:path"
+$t = "\usr\bin;\usr\local\bin;$drv\msys64\usr\bin;$drv\git\cmd;$base_path"
 echo "##vso[task.setvariable variable=INSTALL_PATH]$t"
 
 # set variable JOBS
