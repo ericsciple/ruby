@@ -54,9 +54,6 @@ $dl_path = "$drv/prereq"
 # put all downloaded items in this folder
 New-Item -Path $dl_path -ItemType Directory 1> $null
 
-
-
-
 # make a temp folder on $drv
 $tmpdir_w = "$drv\temp"
 $tmpdir   = "$drv/temp"
@@ -101,6 +98,7 @@ $files = "msys2-runtime-2.11.1-2",
          "bison-3.0.5-1",
          "gmp-6.1.2-1",
          "gperf-3.1-1",
+         "gzip-1.9-1",
          "m4-1.4.18-2",
          "patch-2.7.6-1",
          "sed-4.5-1"
