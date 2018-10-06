@@ -100,7 +100,7 @@ jobs:
         displayName: $(System.JobName) make test-basic
 
       - script: |
-          PATH=%BUILD_PATH%
+          PATH=%INSTALL_PATH%
           call "%VC_VARS%" %VCVARS_PLATFORM%
           cd %BUILD%
           attrib -r %TMPDIR_W% /d /s
@@ -203,7 +203,7 @@ jobs:
         displayName: $(System.JobName) make test-basic
 
       - script: |
-          PATH=%BUILD_PATH%
+          PATH=%INSTALL_PATH%
           cd %SRC%\..\build
           attrib -r %TMPDIR_W% /d /s
           set RUBY_FORCE_TEST_JIT=1
