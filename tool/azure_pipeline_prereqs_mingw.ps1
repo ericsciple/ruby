@@ -104,8 +104,8 @@ Write-Host "$($dash * 78)  pacman.exe -Syu"
 try   { pacman.exe -Syu --noconfirm --needed --noprogressbar 2> $null } catch {}
 Write-Host "$($dash * 78)  pacman.exe -Su"
 try   { pacman.exe -Su  --noconfirm --needed --noprogressbar 2> $null } catch {}
-Write-Host "$($dash * 78)  pacman.exe -S base-devel"
-try   { pacman.exe -S   --noconfirm --needed --noprogressbar base-devel 2> $null }
+Write-Host "$($dash * 78)  pacman.exe -S base base-devel compression"
+try   { pacman.exe -S   --noconfirm --needed --noprogressbar base base-devel compression 2> $null }
 catch {}
 Write-Host "$($dash * 78)  pacman.exe -S toolchain"
 try   { pacman.exe -S   --noconfirm --needed --noprogressbar $($pre + 'toolchain') 2> $null }

@@ -87,37 +87,39 @@ $env:path = "$drv/ruby/bin;$env:path"
 ruby -v
 
 #————————————————————————————————————————————————————————————  bison, gperf, sed
-# updated 2018-10-01, some needed for build, some needed for
-# test-spec
-$files = "msys2-runtime-2.11.1-2",
-         "gcc-libs-7.3.0-3",
-         "libintl-0.19.8.1-1",
-         "libiconv-1.15-1",
-         "coreutils-8.30-1",
-         "bash-4.4.019-3",
-         "bison-3.0.5-1",
-         "gmp-6.1.2-1",
-         "gperf-3.1-1",
-         "gzip-1.9-1",
-         "m4-1.4.18-2",
-         "patch-2.7.6-1",
-         "sed-4.5-1",
-         "tar-1.30-1"
+# updated 2018-10-01
+$file      = "msys2-base-x86_64-20180531.tar"
+$msys2_uri = "http://repo.msys2.org/distrib/x86_64"
 
 $dir1 = "-o$dl_path"
 $dir2 = "-o$drv\msys64"
-$suf  = "-x86_64.pkg.tar"
 
-foreach ($file in $files) {
-  $fn = "$file$suf"
-  $fp = "$dl_path\$fn"    + ".xz"
-  $uri = "$msys2_uri/$fn" + ".xz"
-  $wc.DownloadFile($uri, $fp)
-  Write-Host "Processing $file"
-  7z.exe x $fp $dir1 1> $null
-  $fp = "$dl_path/$fn"
-  7z.exe x $fp $dir2 -ttar -aoa 1> $null
-}
+Write-Host "Downloading $file"
+$fp = "$dl_path\$file" + ".xz"
+$uri = "$msys2_uri/$file" + ".xz"
+$wc.DownloadFile($uri, $fp)
+Write-Host "Processing $file"
+7z.exe x $fp $dir1 1> $null
+$fp = "$dl_path/$file"
+$dir2 = "-o$drv"
+7z.exe x $fp $dir2 1> $null
+Remove-Item $dl_path\*.*
+
+$env:path =  "$drv\ruby\bin;$drv\msys64\usr\bin;$drv\git\cmd;$base_path"
+
+bash.exe -c `"pacman-key --init`"
+bash.exe -c `"pacman-key --populate msys2`"
+bash.exe -c `"pacman-key --refresh-keys`"
+
+$dash = "-"
+
+Write-Host "$($dash * 78)  pacman.exe -Syu"
+try   { pacman.exe -Syu --noconfirm --needed --noprogressbar 2> $null } catch {}
+Write-Host "$($dash * 78)  pacman.exe -Su"
+try   { pacman.exe -Su  --noconfirm --needed --noprogressbar 2> $null } catch {}
+Write-Host "$($dash * 78)  pacman.exe -S base base-devel compression"
+try   { pacman.exe -S   --noconfirm --needed --noprogressbar base-devel 2> $null }
+catch {}
 
 #—————————————————————————————————————————————————————————————————————————  zlib
 $file = "$dl_path/$zlib_file"
