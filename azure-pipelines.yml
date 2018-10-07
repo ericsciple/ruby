@@ -165,19 +165,19 @@ jobs:
           PATH=%BUILD_PATH%
           cd %SRC%\..\build
           echo —————————————————————————————————————————————————————————————————  make update-unicode
-          mingw32-make update-unicode
+          make update-unicode
           echo —————————————————————————————————————————————————————————————————  make update-gems
-          mingw32-make update-gems
+          make update-gems
           echo —————————————————————————————————————————————————————————————————  make extract-extlibs
-          mingw32-make extract-extlibs
+          make extract-extlibs
         displayName: $(System.JobName) make update & extract
 
       - script: |
           PATH=%BUILD_PATH%
           cd %SRC%\..\build
-          mingw32-make -j%JOBS%
+          make -j%JOBS%
           echo —————————————————————————————————————————————————————————————————  make install-nodoc
-          mingw32-make DESTDIR=%INSTALL% install-nodoc
+          make DESTDIR=%INSTALL% install-nodoc
         displayName: $(System.JobName) build & install
 
       - script: |
@@ -189,7 +189,7 @@ jobs:
       - script: |
           PATH=%BUILD_PATH%
           cd %SRC%\..\build
-          mingw32-make btest TESTOPTS="-v -q"
+          make btest TESTOPTS="-v -q"
         continueOnError: true
         failOnStderr: false
         displayName: $(System.JobName) make btest
@@ -197,7 +197,7 @@ jobs:
       - script: |
           PATH=%BUILD_PATH%
           cd %SRC%\..\build
-          mingw32-make test-basic TESTOPTS="-v -q"
+          make test-basic TESTOPTS="-v -q"
         continueOnError: true
         failOnStderr: false
         displayName: $(System.JobName) make test-basic
@@ -207,7 +207,7 @@ jobs:
           cd %SRC%\..\build
           attrib -r %TMPDIR_W% /d /s
           set RUBY_FORCE_TEST_JIT=1
-          mingw32-make test-all TESTOPTS="-j %JOBS% --retry --job-status=normal --subprocess-timeout-scale=1.5 --show-skip"
+          make test-all TESTOPTS="-j %JOBS% --retry --job-status=normal --subprocess-timeout-scale=1.5 --show-skip"
         continueOnError: true
         failOnStderr: false
         timeoutInMinutes: 25

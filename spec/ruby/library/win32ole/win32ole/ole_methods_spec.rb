@@ -14,7 +14,11 @@ platform_is :windows do
     end
 
     it "raises ArgumentError if argument is given" do
-      lambda { @ie.ole_methods(1) }.should raise_error ArgumentError
+      begin
+        @ie.ole_methods(1)
+      rescue => e
+        e.should be_an_instance_of ArgumentError
+      end
     end
 
     it "returns an array of WIN32OLE_METHODs" do

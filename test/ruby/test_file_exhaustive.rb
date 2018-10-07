@@ -1344,9 +1344,10 @@ class TestFileExhaustive < Test::Unit::TestCase
     File.open(regular_file, "r+") do |f|
       f.flock(File::LOCK_EX)
       assert_separately(["-rtimeout", "-", regular_file], "#{<<~begin}#{<<~"end;"}")
+      tout = /mswin/ =~ RUBY_PLATFORM ? 0.3 : 0.1
       begin
         open(ARGV[0], "r") do |f|
-          Timeout.timeout(0.1) do
+          Timeout.timeout(tout) do
             assert(!f.flock(File::LOCK_SH|File::LOCK_NB))
           end
         end

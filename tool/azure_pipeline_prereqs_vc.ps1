@@ -117,8 +117,8 @@ Write-Host "$($dash * 78)  pacman.exe -Syu"
 try   { pacman.exe -Syu --noconfirm --needed --noprogressbar 2> $null } catch {}
 Write-Host "$($dash * 78)  pacman.exe -Su"
 try   { pacman.exe -Su  --noconfirm --needed --noprogressbar 2> $null } catch {}
-Write-Host "$($dash * 78)  pacman.exe -S base base-devel compression"
-try   { pacman.exe -S   --noconfirm --needed --noprogressbar base-devel 2> $null }
+Write-Host "$($dash * 38)  pacman.exe -S base bison compression gperf m4 patch"
+try   { pacman.exe -S   --noconfirm --needed --noprogressbar base bison compression gperf m4 patch 2> $null }
 catch {}
 
 #—————————————————————————————————————————————————————————————————————————  zlib
