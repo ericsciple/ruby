@@ -204,6 +204,17 @@ jobs:
 
       - script: |
           PATH=%INSTALL_PATH%
+          echo where.exe ruby  && where.exe ruby
+          echo where.exe patch && where.exe patch
+          echo where.exe make  && where.exe make
+          echo where.exe strip && where.exe strip
+          echo where.exe git   && where.exe git
+        displayName: $(System.JobName) path check
+        continueOnError: true
+        failOnStderr: false
+
+      - script: |
+          PATH=%INSTALL_PATH%
           cd %SRC%\..\build
           attrib -r %TMPDIR_W% /d /s
           set RUBY_FORCE_TEST_JIT=1
