@@ -1,4 +1,9 @@
 # frozen_string_literal: true
+
+# The assertions called in after_teardown are offset in minitest/unit.rb
+# so that assertions counts with and with this are the same.  If the count
+# changes, please adjust the code in unit.rb, search for tracepnt
+
 module TracePointChecker
   STATE = {
     count: 0,

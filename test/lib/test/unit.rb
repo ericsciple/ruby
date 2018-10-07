@@ -3,10 +3,10 @@ begin
   gem 'minitest', '< 5.0.0' if defined? Gem
 rescue Gem::LoadError
 end
-require 'minitest/unit'
-require 'test/unit/assertions'
+require_relative '../minitest/unit'
+require_relative 'unit/assertions'
 require_relative '../envutil'
-require 'test/unit/testcase'
+require_relative 'unit/testcase'
 require 'optparse'
 
 # See Test::Unit
@@ -83,7 +83,14 @@ module Test
 
         opts.on '-v', '--verbose', "Verbose. Show progress processing files." do
           options[:verbose] = true
-          self.verbose = options[:verbose]
+          self.verbose = true
+        end
+
+        opts.on '-a', '--assert', "Adjust & show assertions numbers" do
+          options[:verbose] = true
+          options[:assert]  = true
+          self.verbose = true
+          self.assert  = true
         end
 
         opts.on '-n', '--name PATTERN', "Filter test method names on pattern: /REGEXP/, !/REGEXP/ or STRING" do |a|
@@ -455,7 +462,6 @@ module Test
           warn "Error: parameter of -j option should be greater than 0."
           return
         end
-
         # Require needed thing for parallel running
         require 'timeout'
         @tasks = @files.dup # Array of filenames.
@@ -508,7 +514,12 @@ module Test
             suites.map! {|r| eval("::"+r[:testcase])}
             del_status_line or puts
             unless suites.empty?
-              puts "\n""Retrying..."
+              puts "\nRetrying..."
+              if @options[:retry]
+                ttl_count = 0
+                suites.each { |s| ttl_count += s.public_instance_methods(true).grep(/^test/).length }
+                @options[:retry_run] = ttl_count
+              end
               _run_suites(suites, type)
             end
             @options[:parallel] = parallel
@@ -525,7 +536,7 @@ module Test
             if @options[:retry]
               @errors   += rep.map{|x| x[:result][0] }.inject(:+)
               @failures += rep.map{|x| x[:result][1] }.inject(:+)
-              @skips    += rep.map{|x| x[:result][2] }.inject(:+)
+              @skips    += rep.map{|x| x[:result][2] }.inject(:+) unless @options[:parallel]
             end
           end
           unless @warnings.empty?
@@ -585,7 +596,7 @@ module Test
 
       def _run_suites(suites, type)
         result = super
-        report.reject!{|r| r.start_with? "Skipped:" } if @options[:hide_skip]
+        report.reject! {|r| r.start_with? "Skipped:" } if @options[:hide_skip]
         report.sort_by!{|r| r.start_with?("Skipped:") ? 0 : \
                            (r.start_with?("Failure:") ? 1 : 2) }
         failed(nil)
@@ -699,6 +710,7 @@ module Test
       end
 
       def _prepare_run(suites, type)
+        @assert = options[:assert]
         options[:job_status] ||= :replace if @tty && !@verbose
         case options[:color]
         when :always
@@ -1092,13 +1104,17 @@ module Test
         # TODO:
         #   this overriding is for minitest feature that skip messages are
         #   hidden when not verbose (-v), note this is temporally.
-        n = report.size
-        rep = super
-        if MiniTest::Skip === e and /no message given\z/ =~ e.message
-          report.slice!(n..-1)
-          rep = "."
+        if options[:hide_skip] == false
+          super
+        else
+          n = report.size
+          rep = super
+          if MiniTest::Skip === e and /no message given\z/ =~ e.message
+            report.slice!(n..-1)
+            rep = "."
+          end
+          rep
         end
-        rep
       end
     end
 

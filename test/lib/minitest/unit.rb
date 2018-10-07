@@ -3,7 +3,7 @@
 
 require "optparse"
 require "rbconfig"
-require "leakchecker"
+require_relative "../leakchecker"
 
 ##
 # Minimal (mostly drop-in) replacement for test-unit.
@@ -747,6 +747,7 @@ module MiniTest
     attr_accessor :start_time                         # :nodoc:
     attr_accessor :help                               # :nodoc:
     attr_accessor :verbose                            # :nodoc:
+    attr_accessor :assert                             # :nodoc:
     attr_writer   :options                            # :nodoc:
 
     ##
@@ -887,8 +888,8 @@ module MiniTest
 
         results = _run_suites suites, type
 
-        @test_count      = results.inject(0) { |sum, (tc, _)| sum + tc }
-        @assertion_count = results.inject(0) { |sum, (_, ac)| sum + ac }
+        @test_count      = results.sum { |i| i[0] }
+        @assertion_count = results.sum { |i| i[1] }
         test_count      += @test_count
         assertion_count += @assertion_count
         t = Time.now - start
@@ -897,7 +898,8 @@ module MiniTest
           puts
           puts
         end
-        puts "Finished%s %ss in %.6fs, %.4f tests/s, %.4f assertions/s.\n" %
+        ret = options[:assert] ? "\n" : ""
+        puts "#{ret}Finished%s %ss in %.6fs, %.4f tests/s, %.4f assertions/s.\n" %
              [(@repeat_count ? "(#{count}/#{@repeat_count}) " : ""), type,
                t, @test_count.fdiv(t), @assertion_count.fdiv(t)]
       end while @repeat_count && count < @repeat_count &&
@@ -921,6 +923,7 @@ module MiniTest
     #
 
     def _run_suites suites, type
+      @assert = @options[:assert]
       suites.map { |suite| _run_suite suite, type }
     end
 
@@ -942,18 +945,39 @@ module MiniTest
 
       leakchecker = LeakChecker.new
 
+      verbose = options[:verbose]
+      retry_run = options[:retry_run]
+      retry_len = retry_run.to_s.length if retry_run
+      assert_offset = 0
+
+      if self.assert # && options[:retry_run]
+        zombie   = (defined?(ZombieHunter)      && ZombieHunter.is_a?(Module)     ) ? -2 : 0
+        tracepnt = (defined?(TracePointChecker) && TracePointChecker.is_a?(Module)) ? -1 : 0
+        assert_offset = zombie + tracepnt
+      end
+
       assertions = filtered_test_methods.map { |method|
         inst = suite.new method
-        inst._assertions = 0
+        inst._assertions = assert_offset
 
-        print "#{suite}##{method} = " if @verbose
-
-        start_time = Time.now if @verbose
+        start_time = verbose ? Time.now : nil
         result = inst.run self
 
-        print "%.2f s = " % (Time.now - start_time) if @verbose
-        print result
-        puts if @verbose
+        if start_time
+          ttl = " = %.2f s = " % (Time.now - start_time)
+          if !self.assert # || MetaMetaMetaTestCase === inst.class.superclass
+            print "#{suite}##{method}#{ttl}#{result}"
+          elsif retry_run
+            @cntr ||= 0
+            @cntr += 1
+            print "[#{@cntr.to_s.rjust(retry_len)}/#{retry_run}] #{inst._assertions.to_s.rjust(6)} #{suite}##{method}#{ttl}#{result}"
+          else
+            print "#{inst._assertions.to_s.rjust(6)} #{suite}##{method}#{ttl}#{result}"
+          end
+          print "\n"
+        else
+          print result
+        end
         $stdout.flush
 
         unless defined?(RubyVM::MJIT) && RubyVM::MJIT.enabled? # compiler process is wrongly considered as leaked
@@ -963,7 +987,7 @@ module MiniTest
         inst._assertions
       }
 
-      return assertions.size, assertions.inject(0) { |sum, n| sum + n }
+      return assertions.size, assertions.sum
     end
 
     ##
@@ -1003,7 +1027,7 @@ module MiniTest
       e = case e
           when MiniTest::Skip then
             @skips += 1
-            return "S" unless @verbose
+            return "S" unless @verbose || options[:hide_skip] == false
             "Skipped:\n#{klass}##{meth} [#{location e}]:\n#{e.message}\n"
           when MiniTest::Assertion then
             @failures += 1
@@ -1021,6 +1045,7 @@ module MiniTest
       @report = []
       @errors = @failures = @skips = 0
       @verbose = false
+      @assert = false
       @mutex = Thread::Mutex.new
       @info_signal = Signal.list['INFO']
       @repeat_count = nil
@@ -1055,6 +1080,11 @@ module MiniTest
           options[:verbose] = true
         end
 
+        opts.on '-a', '--assert', "Adjust & show assertions numbers" do
+          options[:verbose] = true
+          options[:assert]  = true
+        end
+
         opts.on '-n', '--name PATTERN', "Filter test names on pattern (e.g. /foo/)" do |a|
           options[:filter] = a
         end
@@ -1072,6 +1102,8 @@ module MiniTest
       srand options[:seed]
 
       self.verbose = options[:verbose]
+      self.assert  = options[:assert]
+
       @help = orig_args.map { |s| s =~ /[\s|&<>$()]/ ? s.inspect : s }.join " "
 
       options

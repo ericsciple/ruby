@@ -10,7 +10,7 @@ Dir.glob("#{src_testdir}/../gems/*/*.gemspec")
   .reject {|f| f =~ /minitest|test-unit|power_assert/ }
   .map {|f| $LOAD_PATH.unshift File.join(File.dirname(f), "lib") }
 
-require 'test/unit'
+require_relative './lib/test/unit'
 
 module Gem
 end
